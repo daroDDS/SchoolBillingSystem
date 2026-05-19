@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Record Payment - Bill #{{ bill.bill_id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Record Payment for Bill #{{ bill.bill_id }}</h2>
+
+    <div class="bill-info">
+        <div class="info-row">
+            <span class="info-label">Student:</span>
+            <span>{{ bill.billing_profile.student.get_full_name() }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Term:</span>
+            <span>{{ bill.billing_profile.term }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Total amount:</span>
+            <span>{{ "%.0f"|format(bill.total_amount) }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Already paid:</span>
+            <span>{{ "%.0f"|format(bill.amount_paid) }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Remaining balance:</span>
+            <span><strong>{{ "%.0f"|format(bill.balance) }}</strong></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Current status:</span>
+            <span class="badge badge-{{ bill.status|lower }}">{{ bill.status }}</span>
+        </div>
+    </div>
+
+    <hr>
+
+    {% if bill.status in ["PAID", "CANCELLED"] %}
+        <p class="empty">This bill is {{ bill.status }} and no longer accepts payments.</p>
+        <a href="{{ url_for('bill.bill_detail', bill_id=bill.bill_id) }}" class="btn">Back to Bill</a>
+    {% else %}
+        <form method="POST" action="{{ url_for('payment.record_payment', bill_id=bill.bill_id) }}">
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" name="amount"
+                       step="0.01" min="0.01" max="{{ bill.balance }}"
+                       required autofocus>
+                <small>Maximum: {{ "%.0f"|format(bill.balance) }}</small>
+            </div>
+
+            <div class="form-group">
+                <label for="method">Payment method</label>
+                <select id="method" name="method" required>
+                    <option value="CASH">Cash</option>
+                    <option value="BANK_TRANSFER">Bank Transfer</option>
+                    <option value="MOBILE_MONEY">Mobile Money</option>
+                    <option value="CHEQUE">Cheque</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Record Payment</button>
+            <a href="{{ url_for('bill.bill_detail', bill_id=bill.bill_id) }}" class="btn">Cancel</a>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

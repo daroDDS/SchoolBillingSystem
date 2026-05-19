@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Receipt #{{ receipt.receipt_id }}{% endblock %}
+
+{% block content %}
+<div class="card receipt-card">
+    <div class="card-header">
+        <h2>Payment Receipt</h2>
+        {% if receipt.is_cancelled %}
+            <span class="badge badge-cancelled">CANCELLED</span>
+        {% else %}
+            <span class="badge badge-paid">VALID</span>
+        {% endif %}
+    </div>
+
+    <div class="receipt-body">
+        <div class="info-row">
+            <span class="info-label">Receipt ID:</span>
+            <span>#{{ receipt.receipt_id }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Issue Date:</span>
+            <span>{{ receipt.issue_date[:19].replace('T', ' ') }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Student:</span>
+            <span>{{ payment.bill.billing_profile.student.get_full_name() }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Bill #:</span>
+            <span>{{ payment.bill.bill_id }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Payment Method:</span>
+            <span>{{ payment.method.replace('_', ' ') }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Recorded by:</span>
+            <span>{{ payment.recorded_by.username }}</span>
+        </div>
+
+        <hr>
+
+        <div class="amount-row total">
+            <span><strong>Amount paid:</strong></span>
+            <span><strong>{{ "%.0f"|format(payment.amount) }}</strong></span>
+        </div>
+        <div class="amount-row">
+            <span>Remaining balance on bill:</span>
+            <span>{{ "%.0f"|format(payment.bill.balance) }}</span>
+        </div>
+        <div class="info-row" style="margin-top: 0.5rem;">
+            <span class="info-label">Bill status now:</span>
+            <span class="badge badge-{{ payment.bill.status|lower }}">{{ payment.bill.status }}</span>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="actions">
+        <button onclick="window.print()" class="btn">Print</button>
+        <a href="{{ url_for('bill.bill_detail', bill_id=payment.bill.bill_id) }}" class="btn">Back to Bill</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Bill #{{ bill.bill_id }} - School Billing{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Bill #{{ bill.bill_id }}</h2>
+        <span class="badge badge-{{ bill.status|lower }}">{{ bill.status }}</span>
+    </div>
+
+    <div class="bill-info">
+        <div class="info-row">
+            <span class="info-label">Student:</span>
+            <span>{{ bill.billing_profile.student.get_full_name() }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Class:</span>
+            <span>{{ bill.billing_profile.student.student_class }} ({{ bill.billing_profile.student.program }})</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Term:</span>
+            <span>{{ bill.billing_profile.term }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Issue Date:</span>
+            <span>{{ bill.issue_date[:10] }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Due Date:</span>
+            <span>{{ bill.due_date }} {% if bill.is_overdue() %}<span class="badge badge-overdue">OVERDUE</span>{% endif %}</span>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="amounts">
+        <div class="amount-row">
+            <span>Original amount:</span>
+            <span>{{ "%.0f"|format(bill.original_amount) }}</span>
+        </div>
+        {% if discount %}
+            <div class="amount-row discount">
+                <span>Discount ({{ discount.reason }}):</span>
+                <span>- {{ "%.0f"|format(bill.discount_amount) }}</span>
+            </div>
+        {% endif %}
+        <div class="amount-row total">
+            <span><strong>Total to pay:</strong></span>
+            <span><strong>{{ "%.0f"|format(bill.total_amount) }}</strong></span>
+        </div>
+        <div class="amount-row">
+            <span>Amount paid:</span>
+            <span>{{ "%.0f"|format(bill.amount_paid) }}</span>
+        </div>
+        <div class="amount-row balance">
+            <span><strong>Remaining balance:</strong></span>
+            <span><strong>{{ "%.0f"|format(bill.balance) }}</strong></span>
+        </div>
+    </div>
+
+    {% if user.role.name in ["Administrator", "FinanceStaff"] %}
+        <hr>
+        <div class="actions">
+            <span class="info-label">Actions:</span>
+            {% if bill.status in ["UNPAID", "PARTIALLY_PAID"] %}
+                <a class="btn btn-primary" href="{{ url_for('payment.record_payment', bill_id=bill.bill_id) }}">Record Payment</a>
+            {% endif %}
+            {% if bill.status == "UNPAID" and not discount %}
+                <a class="btn" href="{{ url_for('discount.apply_discount', bill_id=bill.bill_id) }}">Apply Discount</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+{# === Payments list === #}
+<div class="card">
+    <h3>Payments</h3>
+    {% if payments %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Payment ID</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Date</th>
+                    <th>Recorded by</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                    <tr>
+                        <td><a href="{{ url_for('payment.receipt_view', payment_id=p.payment_id) }}">#{{ p.payment_id }}</a></td>
+                        <td>{{ "%.0f"|format(p.amount) }}</td>
+                        <td>{{ p.method }}</td>
+                        <td>{{ p.payment_date[:10] }}</td>
+                        <td>{{ p.recorded_by.username }}</td>
+                        <td>
+                            {% if p.is_reversed %}
+                                <span class="badge badge-cancelled">REVERSED</span>
+                            {% else %}
+                                <span class="badge badge-paid">ACTIVE</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not p.is_reversed and user.role.name in ["Administrator", "FinanceStaff"] %}
+                                <a href="{{ url_for('payment.reverse_payment', payment_id=p.payment_id) }}"
+                                class="btn btn-small">Reverse</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty">No payments recorded yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

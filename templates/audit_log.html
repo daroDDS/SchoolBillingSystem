@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Log{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Audit Log</h2>
+        <div class="card-actions">
+            <a class="btn btn-small" href="{{ url_for('audit.view_log', limit=50) }}">50</a>
+            <a class="btn btn-small" href="{{ url_for('audit.view_log', limit=100) }}">100</a>
+            <a class="btn btn-small" href="{{ url_for('audit.view_log', limit=500) }}">500</a>
+        </div>
+    </div>
+
+    <p>Showing the most recent <strong>{{ limit }}</strong> entries.</p>
+
+    {% if entries %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                    <tr>
+                        <td>#{{ entry.log_id }}</td>
+                        <td>{{ entry.timestamp[:19].replace('T', ' ') }}</td>
+                        <td>{{ entry.user.username }} ({{ entry.user.role.name }})</td>
+                        <td><strong>{{ entry.action }}</strong></td>
+                        <td>{{ entry.details or '' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty">No audit log entries yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

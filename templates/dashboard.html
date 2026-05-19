@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - School Billing{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome, {{ user.username }}</h2>
+    <p>You are logged in as <strong>{{ user.role.name }}</strong>.</p>
+</div>
+
+<div class="dashboard-grid">
+
+    {# === ADMINISTRATOR menu === #}
+    {% if user.role.name == "Administrator" %}
+        <div class="dashboard-card">
+            <h3>All Bills</h3>
+            <p>View every bill in the system.</p>
+            <a class="btn" href="{{ url_for('bill.list_bills') }}">View Bills</a>
+        </div>
+        <div class="dashboard-card">
+            <h3>Fee Structures</h3>
+            <p>Create and approve fee structures.</p>
+            <a class="btn">Manage Fees (coming soon)</a>
+        </div>
+       <div class="dashboard-card">
+            <h3>Audit Log</h3>
+            <p>View important actions in the system.</p>
+            <a class="btn" href="{{ url_for('audit.view_log') }}">View Audit Log</a>
+        </div>
+        <div class="dashboard-card">
+            <h3>Reports</h3>
+            <p>Generate financial reports.</p>
+            <a class="btn" href="{{ url_for('report.reports_home') }}">View Reports</a>
+        </div>
+    {% endif %}
+
+    {# === FINANCE STAFF menu === #}
+    {% if user.role.name == "FinanceStaff" %}
+        <div class="dashboard-card">
+            <h3>Record Payment</h3>
+            <p>See bills awaiting payment and record a new payment.</p>
+            <a class="btn" href="{{ url_for('bill.list_unpaid') }}">Go to Unpaid Bills</a>
+        </div>
+        <div class="dashboard-card">
+            <h3>Bills</h3>
+            <p>View all bills (unpaid, overdue, etc.).</p>
+            <a class="btn" href="{{ url_for('bill.list_bills') }}">All Bills</a>
+            <a class="btn btn-small" href="{{ url_for('bill.list_unpaid') }}">Unpaid</a>
+            <a class="btn btn-small" href="{{ url_for('bill.list_overdue') }}">Overdue</a>
+        </div>
+        <div class="dashboard-card">
+            <h3>Reports</h3>
+            <p>Generate financial reports.</p>
+            <a class="btn" href="{{ url_for('report.reports_home') }}">View Reports</a>
+        </div>
+    {% endif %}
+
+    {# === STUDENT menu === #}
+    {% if user.role.name == "Student" %}
+        <div class="dashboard-card">
+            <h3>My Bills</h3>
+            <p>View your bills and balance.</p>
+            <a class="btn" href="{{ url_for('bill.my_bills') }}">View My Bills</a>
+        </div>
+        <div class="dashboard-card">
+            <h3>My Receipts</h3>
+            <p>View your past payment receipts.</p>
+            <a class="btn" href="{{ url_for('payment.my_receipts') }}">View My Receipts</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

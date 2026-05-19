@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}School Billing{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <h1>School Fee Payment and Billing System</h1>
+        {% if session.get('user_id') %}
+            <nav>
+                <span>Logged in as <strong>{{ session.get('username') }}</strong> ({{ session.get('role_name') }})</span>
+                <a href="{{ url_for('auth.dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('auth.logout') }}">Logout</a>
+            </nav>
+        {% endif %}
+    </div>
+</header>
+
+<main>
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-area">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<footer>
+    <p>CS 2712 Final Project &mdash; School Fee Payment and Billing System</p>
+</footer>
+
+</body>
+</html>

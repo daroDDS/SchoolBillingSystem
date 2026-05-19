@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title or "All Bills" }} - School Billing{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>{{ title or "All Bills" }}</h2>
+        <div class="card-actions">
+            <a href="{{ url_for('bill.list_bills') }}" class="btn btn-small">All</a>
+            <a href="{{ url_for('bill.list_unpaid') }}" class="btn btn-small">Unpaid</a>
+            <a href="{{ url_for('bill.list_overdue') }}" class="btn btn-small">Overdue</a>
+        </div>
+    </div>
+
+    {% if bills %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Bill ID</th>
+                    <th>Student</th>
+                    <th>Term</th>
+                    <th>Total</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in bills %}
+                    <tr>
+                        <td>#{{ bill.bill_id }}</td>
+                        <td>{{ bill.billing_profile.student.get_full_name() }}</td>
+                        <td>{{ bill.billing_profile.term }}</td>
+                        <td>{{ "%.0f"|format(bill.total_amount) }}</td>
+                        <td>{{ "%.0f"|format(bill.amount_paid) }}</td>
+                        <td><strong>{{ "%.0f"|format(bill.balance) }}</strong></td>
+                        <td>
+                            <span class="badge badge-{{ bill.status|lower }}">{{ bill.status }}</span>
+                            {% if bill.is_overdue() %}
+                                <span class="badge badge-overdue">OVERDUE</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ bill.due_date }}</td>
+                        <td><a href="{{ url_for('bill.bill_detail', bill_id=bill.bill_id) }}" class="btn btn-small">View</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty">No bills found.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Reverse Payment #{{ payment.payment_id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Reverse Payment #{{ payment.payment_id }}</h2>
+
+    <div class="flash flash-error" style="margin-bottom: 1rem;">
+        <strong>⚠ Warning:</strong> Reversing a payment cannot be undone.
+        The original payment will be kept in the history but marked as reversed.
+        The receipt will be cancelled and the bill balance will go back up.
+    </div>
+
+    <div class="bill-info">
+        <div class="info-row">
+            <span class="info-label">Payment ID:</span>
+            <span>#{{ payment.payment_id }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Amount:</span>
+            <span><strong>{{ "%.0f"|format(payment.amount) }}</strong></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Method:</span>
+            <span>{{ payment.method.replace('_', ' ') }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date:</span>
+            <span>{{ payment.payment_date[:10] }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Originally recorded by:</span>
+            <span>{{ payment.recorded_by.username }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Bill:</span>
+            <span>#{{ payment.bill.bill_id }} ({{ payment.bill.billing_profile.student.get_full_name() }})</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Bill current status:</span>
+            <span class="badge badge-{{ payment.bill.status|lower }}">{{ payment.bill.status }}</span>
+        </div>
+    </div>
+
+    <hr>
+
+    <form method="POST" action="{{ url_for('payment.reverse_payment', payment_id=payment.payment_id) }}">
+        <div class="form-group">
+            <label for="reason">Reason for reversal <span style="color: red">*</span></label>
+            <input type="text" id="reason" name="reason" required autofocus
+                   placeholder="e.g. Wrong amount entered, wrong student, duplicate, cheque bounced">
+            <small>This reason will be saved in the audit log.</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Confirm Reversal</button>
+        <a href="{{ url_for('bill.bill_detail', bill_id=payment.bill.bill_id) }}" class="btn">Cancel</a>
+    </form>
+</div>
+{% endblock %}

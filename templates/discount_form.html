@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Apply Discount - Bill #{{ bill.bill_id }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Apply Discount to Bill #{{ bill.bill_id }}</h2>
+
+    <div class="bill-info">
+        <div class="info-row">
+            <span class="info-label">Student:</span>
+            <span>{{ bill.billing_profile.student.get_full_name() }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Original amount:</span>
+            <span>{{ "%.0f"|format(bill.original_amount) }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Current total:</span>
+            <span><strong>{{ "%.0f"|format(bill.total_amount) }}</strong></span>
+        </div>
+    </div>
+
+    <hr>
+
+    <form method="POST" action="{{ url_for('discount.apply_discount', bill_id=bill.bill_id) }}">
+
+        <div class="form-group">
+            <label for="discount_type">Discount type</label>
+            <select id="discount_type" name="discount_type" required onchange="updateFields()">
+                <option value="">-- Choose a type --</option>
+                <option value="FIXED_AMOUNT">Fixed Amount</option>
+                <option value="PERCENTAGE">Percentage</option>
+                <option value="SCHOLARSHIP">Scholarship (50% off)</option>
+                <option value="WAIVER">Full Waiver (100% off)</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="amount-group" style="display: none;">
+            <label for="amount">Amount</label>
+            <input type="number" id="amount" name="amount"
+                   step="0.01" min="0" max="{{ bill.original_amount }}">
+            <small>Maximum: {{ "%.0f"|format(bill.original_amount) }}</small>
+        </div>
+
+        <div class="form-group" id="percentage-group" style="display: none;">
+            <label for="percentage">Percentage (%)</label>
+            <input type="number" id="percentage" name="percentage"
+                   step="0.01" min="0" max="100">
+            <small>Between 0 and 100</small>
+        </div>
+
+        <div class="form-group">
+            <label for="reason">Reason</label>
+            <input type="text" id="reason" name="reason" required
+                   placeholder="e.g. Sibling discount, academic excellence, etc.">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Apply Discount</button>
+        <a href="{{ url_for('bill.bill_detail', bill_id=bill.bill_id) }}" class="btn">Cancel</a>
+    </form>
+</div>
+
+<script>
+function updateFields() {
+    const type = document.getElementById('discount_type').value;
+    const amountGroup = document.getElementById('amount-group');
+    const percentageGroup = document.getElementById('percentage-group');
+
+    // Hide both first
+    amountGroup.style.display = 'none';
+    percentageGroup.style.display = 'none';
+
+    // Show the relevant one
+    if (type === 'FIXED_AMOUNT') {
+        amountGroup.style.display = 'block';
+    } else if (type === 'PERCENTAGE') {
+        percentageGroup.style.display = 'block';
+    }
+    // SCHOLARSHIP and WAIVER don't need extra input
+}
+</script>
+{% endblock %}
