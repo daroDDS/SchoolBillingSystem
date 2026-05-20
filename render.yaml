@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: school-billing
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python init_db.py && python seed_data.py && gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
