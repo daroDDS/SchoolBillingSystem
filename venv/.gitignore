@@ -41,6 +41,3 @@ ehthumbs.db
 # Editor backups
 *~
 *.bak
-
-.requirements.txt
-.render.yaml
