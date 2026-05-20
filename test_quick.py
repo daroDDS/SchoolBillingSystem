@@ -51,7 +51,7 @@ audit_repo = AuditLogRepository()
 # ============================================
 print("=== Setting up ===")
 finance_role = role_repo.save(Role(None, "FinanceStaff", ["record_payment"]))
-alice = user_repo.save(User(None, "alice", "hashed", finance_role))
+mohamed = user_repo.save(User(None, "mohamed", "hashed", finance_role))
 daro = student_repo.save(Student(None, "Daro", "Diop", "daro@school.com", "Senior 1", "CS"))
 profile = profile_repo.save(BillingProfile(None, daro, "Spring 2026"))
 tuition = fee_item_repo.save(FeeItem(None, "Tuition", 500000))
@@ -70,13 +70,13 @@ bill = bill_repo.save(bill)
 
 # Apply a 10% discount
 discount = DiscountFactory.create("PERCENTAGE", None,
-                                   "Sibling discount", alice, percentage=10)
+                                   "Sibling discount", mohamed, percentage=10)
 discount_amount = discount.compute_amount(bill.original_amount)
 bill.apply_discount(discount_amount)
 bill = bill_repo.save(bill)
 discount = discount_repo.save(discount, "PERCENTAGE", bill.bill_id)
 
-audit_repo.log_action(alice, "discount applied",
+audit_repo.log_action(mohamed, "discount applied",
                        f"Bill {bill.bill_id}, amount {discount_amount}")
 
 print(f"  Bill: {bill}")
@@ -91,13 +91,13 @@ print("=== Record payment + receipt ===")
 bill.add_payment(450000)  # full amount after discount
 bill = bill_repo.save(bill)
 
-payment = Payment(None, bill, 450000, "BANK_TRANSFER", alice)
+payment = Payment(None, bill, 450000, "BANK_TRANSFER", mohamed)
 payment = payment_repo.save(payment)
 
 receipt = payment.generate_receipt(receipt_id=None)
 receipt = receipt_repo.save(receipt)
 
-audit_repo.log_action(alice, "payment recorded",
+audit_repo.log_action(mohamed, "payment recorded",
                        f"Payment {payment.payment_id} for bill {bill.bill_id}")
 
 print(f"  Bill: {bill}")
@@ -110,7 +110,7 @@ print()
 # Reverse the payment (it was wrong!)
 # ============================================
 print("=== Reverse the payment ===")
-reversal = Reversal(None, payment, "Wrong amount entered", alice)
+reversal = Reversal(None, payment, "Wrong amount entered", mohamed)
 reversal.execute()  # marks payment as reversed
 reversal = reversal_repo.save(reversal)
 payment = payment_repo.save(payment)  # save the is_reversed flag
@@ -123,7 +123,7 @@ bill = bill_repo.save(bill)
 receipt.cancel()
 receipt = receipt_repo.save(receipt)
 
-audit_repo.log_action(alice, "payment reversed",
+audit_repo.log_action(mohamed, "payment reversed",
                        f"Reversal {reversal.reversal_id} for payment {payment.payment_id}")
 
 print(f"  Bill after reversal: {bill}")

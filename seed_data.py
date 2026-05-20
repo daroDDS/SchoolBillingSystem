@@ -66,7 +66,7 @@ print(f"  Created roles: Administrator, FinanceStaff, Student")
 default_password_hash = generate_password_hash("password123")
 
 admin_user = user_repo.save(User(None, "admin", default_password_hash, admin_role))
-alice_user = user_repo.save(User(None, "mohamed", default_password_hash, finance_role))
+mohamed_user = user_repo.save(User(None, "mohamed", default_password_hash, finance_role))
 daro_user  = user_repo.save(User(None, "daro",  default_password_hash, student_role))
 print(f"  Created users: admin, mohamed, daro  (password: 'password123')")
 
